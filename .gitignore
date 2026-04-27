@@ -54,3 +54,4 @@ Desktop.ini
 # AppSettings secrets (Optional but recommended if you keep secrets in appsettings.Development.json)
 # appsettings.Development.json
 # appsettings.json
+publish/
