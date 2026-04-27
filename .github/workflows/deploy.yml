@@ -29,5 +29,6 @@ jobs:
 
     - name: Deploy to MonsterASP using MSDeploy
       run: |
-        & "C:\Program Files\IIS\Microsoft Web Deploy V3\msdeploy.exe" -verb:sync -source:contentPath="$(Get-Location)\publish_output" -dest:contentPath="site65905",ComputerName="https://site65905.siteasp.net:8172/msdeploy.axd",UserName="site65905",Password="${{ secrets.MONSTERASP_PASSWORD }}",AuthType="Basic" -allowUntrusted
+        "C:\Program Files\IIS\Microsoft Web Deploy V3\msdeploy.exe" -verb:sync -source:contentPath="%GITHUB_WORKSPACE%\publish_output" -dest:contentPath="site65905",ComputerName="https://site65905.siteasp.net:8172/msdeploy.axd",UserName="site65905",Password="${{ secrets.MONSTERASP_PASSWORD }}",AuthType="Basic" -allowUntrusted
+      shell: cmd
 
