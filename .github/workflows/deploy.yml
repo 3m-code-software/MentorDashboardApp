@@ -24,6 +24,10 @@ jobs:
         New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" -Name "LongPathsEnabled" -Value 1 -PropertyType DWORD -Force
       shell: powershell
 
-    - name: Build and Publish to MonsterASP
+    - name: Build and Publish Locally
+      run: dotnet publish -c Release -o ./publish_output
+
+    - name: Deploy to MonsterASP using MSDeploy
       run: |
-        dotnet build -c Release /p:DeployOnBuild=true /p:PublishMethod=MSDeploy /p:PublishSiteName="site65905" /p:PublishUrl="https://site65905.siteasp.net:8172/msdeploy.axd" /p:UserName="site65905" /p:Password="${{ secrets.MONSTERASP_PASSWORD }}" /p:AllowUntrustedCertificate=True /p:DeployIisAppPath="site65905"
+        & "C:\Program Files\IIS\Microsoft Web Deploy V3\msdeploy.exe" -verb:sync -source:contentPath="$(Get-Location)\publish_output" -dest:contentPath="site65905",ComputerName="https://site65905.siteasp.net:8172/msdeploy.axd",UserName="site65905",Password="${{ secrets.MONSTERASP_PASSWORD }}",AuthType="Basic" -allowUntrusted
+
