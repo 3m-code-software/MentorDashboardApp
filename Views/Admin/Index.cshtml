@@ -1,0 +1,125 @@
+@model MentorDashboardApp.ViewModels.DashboardViewModel
+
+@{
+    ViewData["Title"] = "Dashboard";
+    Layout = "_AdminLayout";
+}
+
+<div class="pagetitle">
+  <h1>Dashboard</h1>
+  <nav>
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="~/Admin/Index">Home</a></li>
+      <li class="breadcrumb-item active">Dashboard</li>
+    </ol>
+  </nav>
+</div>
+
+<section class="section dashboard">
+  <div class="row">
+    <!-- Left side columns -->
+    <div class="col-lg-8">
+      <div class="row">
+        <!-- Enrollments Card -->
+        <div class="col-xxl-4 col-md-6">
+          <div class="card info-card sales-card">
+            <div class="card-body">
+              <h5 class="card-title">Enrollments <span>| Total</span></h5>
+              <div class="d-flex align-items-center">
+                <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                  <i class="bi bi-cart"></i>
+                </div>
+                <div class="ps-3">
+                  <h6>@Model.TotalEnrollments</h6>
+                  <span class="text-success small pt-1 fw-bold">@Model.EnrollmentIncreasePercent%</span> <span class="text-muted small pt-2 ps-1">increase</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Revenue Card -->
+        <div class="col-xxl-4 col-md-6">
+          <div class="card info-card revenue-card">
+            <div class="card-body">
+              <h5 class="card-title">Revenue <span>| Total</span></h5>
+              <div class="d-flex align-items-center">
+                <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                  <i class="bi bi-currency-dollar"></i>
+                </div>
+                <div class="ps-3">
+                  <h6>$@Model.TotalRevenue.ToString("N2")</h6>
+                  <span class="text-success small pt-1 fw-bold">@Model.RevenueIncreasePercent%</span> <span class="text-muted small pt-2 ps-1">increase</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Customers Card -->
+        <div class="col-xxl-4 col-xl-12">
+          <div class="card info-card customers-card">
+            <div class="card-body">
+              <h5 class="card-title">Students <span>| Total</span></h5>
+              <div class="d-flex align-items-center">
+                <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                  <i class="bi bi-people"></i>
+                </div>
+                <div class="ps-3">
+                  <h6>@Model.TotalStudents</h6>
+                  <span class="text-success small pt-1 fw-bold">@Model.StudentsIncreasePercent%</span> <span class="text-muted small pt-2 ps-1">increase</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Reports Chart -->
+        <div class="col-12">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">Reports <span>/Monthly</span></h5>
+              <div id="reportsChart"></div>
+              
+              <!-- Get JSON string of our C# lists to pass to JavaScript -->
+              <script>
+                document.addEventListener("DOMContentLoaded", () => {
+                  var enrollmentsData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.MonthlyEnrollments));
+                  var revenueData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.MonthlyRevenue));
+                  var monthsCategories = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Months));
+
+                  new ApexCharts(document.querySelector("#reportsChart"), {
+                    series: [{
+                      name: 'Enrollments',
+                      data: enrollmentsData
+                    }, {
+                      name: 'Revenue',
+                      data: revenueData
+                    }],
+                    chart: {
+                      height: 350,
+                      type: 'area',
+                      toolbar: { show: false }
+                    },
+                    colors: ['#4154f1', '#2eca6a'],
+                    fill: {
+                      type: "gradient",
+                      gradient: {
+                        shadeIntensity: 1,
+                        opacityFrom: 0.3,
+                        opacityTo: 0.4,
+                        stops: [0, 90, 100]
+                      }
+                    },
+                    dataLabels: { enabled: false },
+                    stroke: { curve: 'smooth', width: 2 },
+                    xaxis: {
+                      categories: monthsCategories
+                    }
+                  }).render();
+                });
+              </script>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

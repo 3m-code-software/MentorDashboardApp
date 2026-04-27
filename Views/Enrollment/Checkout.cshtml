@@ -1,0 +1,156 @@
+@model MentorDashboardApp.Models.Course
+@{
+    var currentCulture = System.Threading.Thread.CurrentThread.CurrentCulture.Name;
+    var isRtl = currentCulture.StartsWith("ar");
+    var title = isRtl && !string.IsNullOrEmpty(Model.TitleAr) ? Model.TitleAr : Model.Title;
+    ViewData["Title"] = isRtl ? "تأكيد التسجيل" : "Checkout";
+    Layout = "_FrontendLayout";
+    
+    decimal finalPrice = (Model.DiscountPrice.HasValue && Model.DiscountPrice > 0) ? Model.DiscountPrice.Value : Model.Price;
+    bool isFree = finalPrice == 0;
+}
+
+<style>
+    .checkout-form .form-control { padding: 12px; border-radius: 8px; }
+    .checkout-card { border-radius: 12px; border: 1px solid #e9ecef; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+    .section-title { font-weight: 700; border-bottom: 2px solid #0d6efd; padding-bottom: 10px; display: inline-block; margin-bottom: 20px; }
+</style>
+
+<!-- Page Title -->
+<div class="page-title dark-background" data-aos="fade" style="background: url('/frontend/assets/img/page-title-bg.jpg') center center; background-size: cover; padding: 60px 0;">
+  <div class="container text-center">
+    <h1>@(isRtl ? "إتمام التسجيل والدفع" : "Complete Enrollment")</h1>
+  </div>
+</div>
+
+<section class="section checkout-form">
+    <div class="container mt-5">
+        <form method="post" action="/Enrollment/ConfirmEnrollment">
+            <input type="hidden" name="courseId" value="@Model.CourseId" />
+            
+            <div class="row @(isRtl ? "rtl" : "")">
+                
+                <!-- Left Column: User Details & Payment -->
+                <div class="col-lg-7 mb-4">
+                    
+                    @if (User.Identity == null || !User.Identity.IsAuthenticated)
+                    {
+                        <div class="checkout-card bg-white p-4 mb-4">
+                            <h4 class="section-title">@(isRtl ? "تفاصيل الحساب" : "Account Details")</h4>
+                            <p class="text-muted mb-4">@(isRtl ? "أدخل بياناتك لإنشاء حساب جديد والوصول للكورس مباشرة." : "Enter your details to create a new account and access the course immediately.")</p>
+                            
+                            <div class="row">
+                                <div class="col-md-12 mb-3">
+                                    <label class="form-label fw-bold">@(isRtl ? "الاسم الكامل" : "Full Name")</label>
+                                    <input type="text" name="fullName" class="form-control" placeholder="@(isRtl ? "مثال: أحمد محمد" : "e.g. John Doe")" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">@(isRtl ? "البريد الإلكتروني" : "Email Address")</label>
+                                    <input type="email" name="email" class="form-control" placeholder="name@example.com" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">@(isRtl ? "كلمة المرور" : "Password")</label>
+                                    <input type="password" name="password" class="form-control" placeholder="********" required>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-success d-flex align-items-center mb-4" role="alert">
+                          <i class="bi bi-check-circle-fill fs-4 me-3 ms-3"></i>
+                          <div>
+                            <strong>@(isRtl ? "أهلاً بك مجدداً!" : "Welcome back!")</strong> @(isRtl ? "أنت مسجل الدخول حالياً، يمكنك إتمام الطلب مباشرة." : "You are currently logged in, you can complete the order directly.")
+                          </div>
+                        </div>
+                    }
+
+                    @if (!isFree)
+                    {
+                        <div class="checkout-card bg-white p-4 mb-4">
+                            <h4 class="section-title">@(isRtl ? "طريقة الدفع" : "Payment Method")</h4>
+                            
+                            <div class="form-check mb-3 border p-3 rounded" style="background: #f8f9fa;">
+                              <input class="form-check-input ms-2 me-2" type="radio" name="paymentMethod" id="creditCard" value="CreditCard" checked>
+                              <label class="form-check-label fw-bold d-flex align-items-center" for="creditCard">
+                                <i class="bi bi-credit-card-2-front fs-4 text-primary me-2 ms-2"></i> @(isRtl ? "البطاقة الائتمانية" : "Credit Card")
+                              </label>
+                            </div>
+                            
+                            <div class="p-3 border rounded mb-3">
+                                <div class="mb-3">
+                                    <label class="form-label">@(isRtl ? "رقم البطاقة" : "Card Number")</label>
+                                    <input type="text" class="form-control" placeholder="0000 0000 0000 0000">
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <label class="form-label">@(isRtl ? "تاريخ الانتهاء" : "Expiry Date")</label>
+                                        <input type="text" class="form-control" placeholder="MM/YY">
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="form-label">CVC</label>
+                                        <input type="text" class="form-control" placeholder="123">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-check border p-3 rounded">
+                              <input class="form-check-input ms-2 me-2" type="radio" name="paymentMethod" id="paypal" value="PayPal">
+                              <label class="form-check-label fw-bold d-flex align-items-center" for="paypal">
+                                <i class="bi bi-paypal fs-4 text-primary me-2 ms-2"></i> PayPal
+                              </label>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <!-- Right Column: Order Summary -->
+                <div class="col-lg-5">
+                    <div class="checkout-card bg-white p-4 position-sticky" style="top: 100px;">
+                        <h4 class="section-title">@(isRtl ? "ملخص الطلب" : "Order Summary")</h4>
+                        
+                        <div class="d-flex align-items-center mb-4 border-bottom pb-3 mt-3">
+                            <img src="@(string.IsNullOrEmpty(Model.ImageUrl) ? "/frontend/assets/img/course-details.jpg" : Model.ImageUrl)" class="rounded shadow-sm" style="width: 100px; height: 75px; object-fit: cover;" alt="">
+                            <div class="ms-3 me-3">
+                                <h6 class="mb-1 fw-bold">@title</h6>
+                                <p class="text-muted mb-0" style="font-size: 0.85em;">@(Model.Trainer?.FullName ?? (isRtl ? "المدرب" : "Instructor"))</p>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between mb-3">
+                            <span class="text-muted">@(isRtl ? "السعر الأصلي:" : "Original Price:")</span>
+                            <span>$@Model.Price</span>
+                        </div>
+                        
+                        @if(Model.DiscountPrice.HasValue && Model.DiscountPrice > 0)
+                        {
+                            <div class="d-flex justify-content-between mb-3 text-success">
+                                <span>@(isRtl ? "الخصم:" : "Discount:")</span>
+                                <span>-$@(Model.Price - Model.DiscountPrice)</span>
+                            </div>
+                        }
+                        
+                        <hr>
+                        <div class="d-flex justify-content-between mb-4">
+                            <strong class="fs-4">@(isRtl ? "الإجمالي:" : "Total:")</strong>
+                            <strong class="fs-3 @(isFree ? "text-success" : "")">
+                                @(isFree ? (isRtl ? "مجاناً" : "Free") : $"${finalPrice}")
+                            </strong>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-lg w-100 fw-bold" style="padding: 15px; border-radius: 50px;">
+                            <i class="bi bi-lock-fill me-2"></i>
+                            @(isFree ? (isRtl ? "إتمام التسجيل مجاناً" : "Complete Free Enrollment") : (isRtl ? "دفع وإتمام التسجيل" : "Pay & Complete Enrollment"))
+                        </button>
+                        
+                        <div class="text-center text-muted mt-4" style="font-size: 0.85em;">
+                            <i class="bi bi-shield-check text-success fs-5"></i><br>
+                            @(isRtl ? "معاملة آمنة ومحمية 100%. ضمان استرداد الأموال خلال 30 يوماً." : "Secure 100% protected transaction. 30-Day Money-Back Guarantee.")
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </form>
+    </div>
+</section>

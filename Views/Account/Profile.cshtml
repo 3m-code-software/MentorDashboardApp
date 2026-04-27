@@ -1,0 +1,231 @@
+@model MentorDashboardApp.Models.User
+@{
+    var currentCulture = System.Threading.Thread.CurrentThread.CurrentCulture.Name;
+    var isRtl = currentCulture.StartsWith("ar");
+    ViewData["Title"] = isRtl ? "الملف الشخصي" : "My Profile";
+    Layout = "_FrontendLayout";
+    
+    var enrollments = ViewBag.Enrollments as List<MentorDashboardApp.Models.Enrollment>;
+    var trainerCourses = ViewBag.TrainerCourses as List<MentorDashboardApp.Models.Course>;
+    var isTrainer = Model.Role == "Trainer";
+}
+
+<style>
+    .profile-sidebar {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        padding: 20px;
+    }
+    .profile-nav .nav-link {
+        color: #555;
+        border-radius: 8px;
+        margin-bottom: 5px;
+        padding: 12px 20px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    .profile-nav .nav-link:hover {
+        background: #f8f9fa;
+        color: #0d6efd;
+    }
+    .profile-nav .nav-link.active {
+        background: #0d6efd;
+        color: #fff;
+    }
+    .profile-content {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        padding: 30px;
+    }
+    .stat-card {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 20px;
+        text-align: center;
+        border: 1px solid #eee;
+    }
+    .stat-card h3 {
+        color: #0d6efd;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+</style>
+
+<div class="page-title dark-background" data-aos="fade" style="background: url('/frontend/assets/img/page-title-bg.jpg') center center; background-size: cover; padding: 60px 0;">
+  <div class="container text-center">
+    <h1>@(isRtl ? "إدارة الملف الشخصي" : "Manage Profile")</h1>
+  </div>
+</div>
+
+<section class="section">
+    <div class="container mt-4 mb-5 @(isRtl ? "rtl" : "")">
+        
+        @if (ViewBag.SuccessMessage != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i> @ViewBag.SuccessMessage
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        <div class="row gy-4">
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <div class="profile-sidebar">
+                    <div class="text-center mb-4 pb-3 border-bottom">
+                        <img src="@(string.IsNullOrEmpty(Model.ProfileImageUrl) ? "/frontend/assets/img/trainers/trainer-1.jpg" : Model.ProfileImageUrl)" 
+                             class="rounded-circle mb-3" style="width: 120px; height: 120px; object-fit: cover; border: 4px solid #eee;">
+                        <h5 class="fw-bold mb-1">@Model.FullName</h5>
+                        <p class="text-muted small mb-2">@Model.Email</p>
+                        <span class="badge @(isTrainer ? "bg-primary" : "bg-success") px-3 py-2 rounded-pill">
+                            <i class="bi @(isTrainer ? "bi-award-fill" : "bi-mortarboard-fill") me-1"></i> @Model.Role
+                        </span>
+                    </div>
+
+                    <ul class="nav nav-pills flex-column profile-nav" id="profileTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link w-100 text-start active" id="personal-tab" data-bs-toggle="tab" data-bs-target="#personal" type="button" role="tab">
+                                <i class="bi bi-person me-2"></i> @(isRtl ? "البيانات الشخصية" : "Personal Details")
+                            </button>
+                        </li>
+                        
+                        @if(isTrainer)
+                        {
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link w-100 text-start" id="public-tab" data-bs-toggle="tab" data-bs-target="#public" type="button" role="tab">
+                                    <i class="bi bi-globe me-2"></i> @(isRtl ? "الملف العام (للمدرب)" : "Public Profile")
+                                </button>
+                            </li>
+                        }
+
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link w-100 text-start" id="security-tab" data-bs-toggle="tab" data-bs-target="#security" type="button" role="tab">
+                                <i class="bi bi-shield-lock me-2"></i> @(isRtl ? "الأمان وكلمة المرور" : "Security & Password")
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Content Area -->
+            <div class="col-lg-8">
+                
+                <!-- Quick Stats Row -->
+                <div class="row mb-4">
+                    <div class="col-md-4 mb-3 mb-md-0">
+                        <div class="stat-card">
+                            <h3>@(isTrainer ? (trainerCourses?.Count ?? 0) : (enrollments?.Count ?? 0))</h3>
+                            <p class="text-muted mb-0">@(isTrainer ? (isRtl ? "إجمالي الكورسات" : "Total Courses") : (isRtl ? "الكورسات المسجلة" : "Enrolled Courses"))</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3 mb-md-0">
+                        <div class="stat-card">
+                            <h3>@(isTrainer ? (new Random().Next(150, 5000)) : 0)</h3>
+                            <p class="text-muted mb-0">@(isTrainer ? (isRtl ? "إجمالي الطلاب" : "Total Students") : (isRtl ? "الشهادات المكتسبة" : "Certificates Earned"))</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stat-card">
+                            <h3>@(isTrainer ? "4.8" : "1")</h3>
+                            <p class="text-muted mb-0">@(isTrainer ? (isRtl ? "متوسط التقييم" : "Average Rating") : (isRtl ? "المستوى الحالي" : "Current Level"))</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="profile-content">
+                    <form method="post" action="/Account/UpdateProfile">
+                        <div class="tab-content" id="profileTabContent">
+                            
+                            <!-- Personal Details Tab -->
+                            <div class="tab-pane fade show active" id="personal" role="tabpanel">
+                                <h4 class="fw-bold mb-4">@(isRtl ? "البيانات الأساسية" : "Basic Information")</h4>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold text-muted">@(isRtl ? "البريد الإلكتروني (لا يمكن تغييره)" : "Email Address (Cannot be changed)")</label>
+                                    <input type="email" class="form-control bg-light" style="padding: 12px; border-radius: 8px;" value="@Model.Email" readonly>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label class="form-label fw-bold">@(isRtl ? "الاسم الكامل" : "Full Name") <span class="text-danger">*</span></label>
+                                    <input type="text" name="FullName" class="form-control" style="padding: 12px; border-radius: 8px;" value="@Model.FullName" required>
+                                </div>
+                            </div>
+
+                            <!-- Public Profile Tab (Trainers Only) -->
+                            @if(isTrainer)
+                            {
+                                <div class="tab-pane fade" id="public" role="tabpanel">
+                                    <div class="d-flex justify-content-between align-items-center mb-4">
+                                        <h4 class="fw-bold mb-0">@(isRtl ? "إعدادات الملف العام" : "Public Profile Settings")</h4>
+                                        <a href="/Trainers/Details/@Model.UserId" target="_blank" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-box-arrow-up-right me-1"></i> @(isRtl ? "معاينة الملف" : "View Public Profile")
+                                        </a>
+                                    </div>
+                                    <div class="alert alert-info">
+                                        <i class="bi bi-info-circle-fill me-2"></i> @(isRtl ? "هذه البيانات ستظهر للطلاب في صفحة تفاصيل الكورس وصفحتك العامة." : "This information will be visible to students on your public profile.")
+                                    </div>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label fw-bold">@(isRtl ? "التخصص (عربي)" : "Specialty (Arabic)")</label>
+                                            <input type="text" name="SpecialtyAr" class="form-control" value="@Model.SpecialtyAr" placeholder="مثال: مطور ويب وخبير تقني">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label fw-bold">@(isRtl ? "التخصص (إنجليزي)" : "Specialty (English)")</label>
+                                            <input type="text" name="Specialty" class="form-control" value="@Model.Specialty" placeholder="e.g: Senior Web Developer">
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">@(isRtl ? "النبذة التعريفية (عربي)" : "Biography (Arabic)")</label>
+                                        <textarea name="BioAr" class="form-control" rows="4" placeholder="اكتب نبذة عن خبراتك...">@Model.BioAr</textarea>
+                                    </div>
+                                    
+                                    <div class="mb-4">
+                                        <label class="form-label fw-bold">@(isRtl ? "النبذة التعريفية (إنجليزي)" : "Biography (English)")</label>
+                                        <textarea name="Bio" class="form-control" rows="4" placeholder="Write about your experience...">@Model.Bio</textarea>
+                                    </div>
+
+                                    <h6 class="fw-bold mb-3 border-bottom pb-2">@(isRtl ? "روابط التواصل الاجتماعي" : "Social Media Links")</h6>
+                                    <div class="mb-3 input-group">
+                                        <span class="input-group-text bg-light"><i class="bi bi-linkedin text-primary"></i></span>
+                                        <input type="url" name="LinkedInUrl" class="form-control" value="@Model.LinkedInUrl" placeholder="https://linkedin.com/in/...">
+                                    </div>
+                                    <div class="mb-3 input-group">
+                                        <span class="input-group-text bg-light"><i class="bi bi-twitter-x text-dark"></i></span>
+                                        <input type="url" name="TwitterUrl" class="form-control" value="@Model.TwitterUrl" placeholder="https://x.com/...">
+                                    </div>
+                                </div>
+                            }
+
+                            <!-- Security Tab -->
+                            <div class="tab-pane fade" id="security" role="tabpanel">
+                                <h4 class="fw-bold mb-4 text-danger">@(isRtl ? "تغيير كلمة المرور" : "Change Password")</h4>
+                                <div class="alert alert-warning">
+                                    <i class="bi bi-exclamation-triangle-fill me-2"></i> @(isRtl ? "اترك الحقل فارغاً إذا كنت لا ترغب في تغيير كلمة المرور الحالية." : "Leave blank if you don't want to change your current password.")
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">@(isRtl ? "كلمة المرور الجديدة" : "New Password")</label>
+                                    <input type="password" name="PasswordHash" class="form-control" style="padding: 12px; border-radius: 8px;">
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+                        <div class="d-flex justify-content-end gap-3">
+                            <a href="/LMS/Dashboard" class="btn btn-light px-4" style="border-radius: 50px;">
+                                @(isRtl ? "إلغاء" : "Cancel")
+                            </a>
+                            <button type="submit" class="btn btn-primary px-5 fw-bold" style="border-radius: 50px;">
+                                <i class="bi bi-save me-2"></i> @(isRtl ? "حفظ التعديلات" : "Save Changes")
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>

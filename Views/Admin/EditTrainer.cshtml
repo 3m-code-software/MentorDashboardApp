@@ -1,0 +1,75 @@
+@model MentorDashboardApp.Models.User
+@{
+    ViewData["Title"] = Model.UserId == 0 ? "Add Trainer" : "Edit Trainer";
+    Layout = "_Layout";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>@(Model.UserId == 0 ? "Add New Trainer" : "Edit Trainer: " + Model.FullName)</h2>
+    <a href="/Admin/ManageTrainers" class="btn btn-outline-secondary">Back to List</a>
+</div>
+
+<form method="post" action="/Admin/EditTrainer" class="card shadow-sm p-4">
+    <input type="hidden" name="UserId" value="@Model.UserId" />
+    
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label class="form-label fw-bold">Full Name</label>
+            <input type="text" name="FullName" class="form-control" value="@Model.FullName" required>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label class="form-label fw-bold">Email (Login)</label>
+            <input type="email" name="Email" class="form-control" value="@Model.Email" required>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label class="form-label fw-bold">Password</label>
+            <input type="password" name="PasswordHash" class="form-control" placeholder="@(Model.UserId == 0 ? "Required" : "Leave blank to keep current")" @(Model.UserId == 0 ? "required" : "")>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label class="form-label fw-bold">Profile Image URL</label>
+            <input type="text" name="ProfileImageUrl" class="form-control" value="@Model.ProfileImageUrl" placeholder="/frontend/assets/img/trainers/trainer-1.jpg">
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <label class="form-label fw-bold">Specialty (English)</label>
+            <input type="text" name="Specialty" class="form-control" value="@Model.Specialty">
+        </div>
+        <div class="col-md-6 mb-3">
+            <label class="form-label fw-bold">Specialty (Arabic)</label>
+            <input type="text" name="SpecialtyAr" class="form-control" value="@Model.SpecialtyAr">
+        </div>
+
+        <div class="col-12 mb-3">
+            <label class="form-label fw-bold">Biography (English)</label>
+            <textarea name="Bio" class="form-control" rows="4">@Model.Bio</textarea>
+        </div>
+        <div class="col-12 mb-3">
+            <label class="form-label fw-bold">Biography (Arabic)</label>
+            <textarea name="BioAr" class="form-control" rows="4">@Model.BioAr</textarea>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <label class="form-label fw-bold"><i class="bi bi-facebook text-primary"></i> Facebook URL</label>
+            <input type="text" name="FacebookUrl" class="form-control" value="@Model.FacebookUrl">
+        </div>
+        <div class="col-md-4 mb-3">
+            <label class="form-label fw-bold"><i class="bi bi-twitter-x text-dark"></i> Twitter/X URL</label>
+            <input type="text" name="TwitterUrl" class="form-control" value="@Model.TwitterUrl">
+        </div>
+        <div class="col-md-4 mb-3">
+            <label class="form-label fw-bold"><i class="bi bi-linkedin text-info"></i> LinkedIn URL</label>
+            <input type="text" name="LinkedInUrl" class="form-control" value="@Model.LinkedInUrl">
+        </div>
+        
+        <div class="col-12 mb-4 mt-2">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" name="IsActive" value="true" @(Model.IsActive ? "checked" : "")>
+              <label class="form-check-label fw-bold text-success">Active Account (Can login and appear in frontend)</label>
+            </div>
+            <!-- ASP.NET Core checkbox hack -->
+            <input type="hidden" name="IsActive" value="false" />
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary btn-lg w-100">Save Trainer Profile</button>
+</form>

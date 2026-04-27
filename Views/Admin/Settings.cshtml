@@ -1,0 +1,120 @@
+@{
+    var isRtl = System.Threading.Thread.CurrentThread.CurrentCulture.Name.StartsWith("ar");
+    ViewData["Title"] = isRtl ? "إعدادات النظام" : "System Settings";
+    Layout = "_AdminLayout";
+}
+
+<div class="pagetitle">
+  <h1>@(isRtl ? "إعدادات النظام" : "System Settings")</h1>
+  <nav>
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="~/Admin/Index">@(isRtl ? "الرئيسية" : "Home")</a></li>
+      <li class="breadcrumb-item active">@(isRtl ? "الإعدادات" : "Settings")</li>
+    </ol>
+  </nav>
+</div>
+
+<section class="section">
+  <div class="row">
+    <div class="col-xl-4">
+      <div class="card">
+        <div class="card-body profile-card pt-4 d-flex flex-column align-items-center">
+          <i class="bi bi-gear-fill text-primary" style="font-size: 5rem;"></i>
+          <h2>@(isRtl ? "تهيئة المنصة" : "Platform Configuration")</h2>
+          <h3 class="text-center mt-2">@(isRtl ? "إدارة إعدادات الموقع، وبوابات الدفع، والعمولات الخاصة بالمدربين." : "Manage website settings, payment gateways, and trainer commissions.")</h3>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-8">
+      <div class="card">
+        <div class="card-body pt-3">
+          
+          @if (TempData["SuccessMessage"] != null)
+          {
+              <div class="alert alert-success alert-dismissible fade show" role="alert">
+                  <i class="bi bi-check-circle me-1"></i>
+                  @TempData["SuccessMessage"]
+                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+          }
+
+          <!-- Bordered Tabs -->
+          <ul class="nav nav-tabs nav-tabs-bordered">
+            <li class="nav-item">
+              <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#profile-overview">@(isRtl ? "الإعدادات العامة" : "General Settings")</button>
+            </li>
+            <li class="nav-item">
+              <button class="nav-link" data-bs-toggle="tab" data-bs-target="#profile-edit">@(isRtl ? "إعدادات المدفوعات" : "Payment Settings")</button>
+            </li>
+          </ul>
+
+          <div class="tab-content pt-2">
+
+            <div class="tab-pane fade show active profile-overview mt-3" id="profile-overview">
+              <form method="post" action="/Admin/SaveSettings">
+                <div class="row mb-3">
+                  <label for="siteName" class="col-md-4 col-lg-3 col-form-label">@(isRtl ? "اسم المنصة" : "Platform Name")</label>
+                  <div class="col-md-8 col-lg-9">
+                    <input name="siteName" type="text" class="form-control" id="siteName" value="@ViewBag.SiteName">
+                  </div>
+                </div>
+
+                <div class="row mb-3">
+                  <label for="contactEmail" class="col-md-4 col-lg-3 col-form-label">@(isRtl ? "البريد الإلكتروني للتواصل" : "Contact Email")</label>
+                  <div class="col-md-8 col-lg-9">
+                    <input name="contactEmail" type="email" class="form-control" id="contactEmail" value="@ViewBag.ContactEmail">
+                  </div>
+                </div>
+
+                <div class="row mb-3">
+                  <label for="contactPhone" class="col-md-4 col-lg-3 col-form-label">@(isRtl ? "رقم الهاتف" : "Contact Phone")</label>
+                  <div class="col-md-8 col-lg-9">
+                    <input name="contactPhone" type="text" class="form-control" id="contactPhone" value="@ViewBag.ContactPhone">
+                  </div>
+                </div>
+
+                <div class="text-center mt-4">
+                  <button type="submit" class="btn btn-primary">@(isRtl ? "حفظ التعديلات" : "Save Changes")</button>
+                </div>
+              </form>
+            </div>
+
+            <div class="tab-pane fade profile-edit pt-3" id="profile-edit">
+              <form method="post" action="/Admin/SaveSettings">
+                <div class="row mb-3">
+                  <label for="currency" class="col-md-4 col-lg-3 col-form-label">@(isRtl ? "العملة الافتراضية" : "Default Currency")</label>
+                  <div class="col-md-8 col-lg-9">
+                    <select name="currency" class="form-select" id="currency">
+                        <option value="USD" selected="@(ViewBag.Currency == "USD")">USD ($)</option>
+                        <option value="EGP" selected="@(ViewBag.Currency == "EGP")">EGP (جنيه مصري)</option>
+                        <option value="SAR" selected="@(ViewBag.Currency == "SAR")">SAR (ريال سعودي)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="row mb-3">
+                  <label for="trainerCommission" class="col-md-4 col-lg-3 col-form-label">@(isRtl ? "نسبة أرباح المدرب (%)" : "Trainer Commission (%)")</label>
+                  <div class="col-md-8 col-lg-9">
+                    <div class="input-group">
+                        <input name="trainerCommission" type="number" class="form-control" id="trainerCommission" value="@ViewBag.TrainerCommission" min="1" max="100">
+                        <span class="input-group-text">%</span>
+                    </div>
+                    <small class="text-muted">@(isRtl ? "النسبة المئوية التي يحصل عليها المدرب من مبيعات كورساته." : "The percentage the trainer earns from their course sales.")</small>
+                  </div>
+                </div>
+
+                <div class="text-center mt-4">
+                  <button type="submit" class="btn btn-primary">@(isRtl ? "تحديث المدفوعات" : "Update Payments")</button>
+                </div>
+              </form>
+            </div>
+
+          </div><!-- End Bordered Tabs -->
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>

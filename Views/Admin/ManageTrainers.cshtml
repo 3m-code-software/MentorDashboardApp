@@ -1,0 +1,71 @@
+@model IEnumerable<MentorDashboardApp.Models.User>
+@{
+    var isRtl = System.Threading.Thread.CurrentThread.CurrentCulture.Name.StartsWith("ar");
+    ViewData["Title"] = isRtl ? "إدارة المدربين" : "Manage Trainers";
+    Layout = "_AdminLayout";
+}
+
+<div class="pagetitle d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h1>@(isRtl ? "إدارة المدربين" : "Manage Trainers")</h1>
+    <nav>
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="~/Admin/Index">@(isRtl ? "الرئيسية" : "Home")</a></li>
+        <li class="breadcrumb-item active">@(isRtl ? "المدربين" : "Trainers")</li>
+      </ol>
+    </nav>
+  </div>
+  <a href="/Admin/EditTrainer" class="btn btn-primary"><i class="bi bi-person-plus"></i> @(isRtl ? "إضافة مدرب جديد" : "Add New Trainer")</a>
+</div>
+
+<section class="section">
+  <div class="row">
+    <div class="col-lg-12">
+      <div class="card shadow-sm">
+          <div class="card-body mt-3">
+              <table class="table table-hover align-middle datatable">
+                  <thead class="table-light">
+                      <tr>
+                          <th>@(isRtl ? "الصورة" : "Photo")</th>
+                          <th>@(isRtl ? "الاسم" : "Name")</th>
+                          <th>@(isRtl ? "التخصص" : "Specialty")</th>
+                          <th>@(isRtl ? "الحالة" : "Status")</th>
+                          <th>@(isRtl ? "الإجراءات" : "Actions")</th>
+                      </tr>
+                  </thead>
+                  <tbody>
+                      @foreach(var trainer in Model)
+                      {
+                          <tr>
+                              <td>
+                                  <img src="@(string.IsNullOrEmpty(trainer.ProfileImageUrl) ? "/frontend/assets/img/trainers/trainer-1.jpg" : trainer.ProfileImageUrl)" 
+                                       class="rounded-circle" style="width: 50px; height: 50px; object-fit: cover;" alt="">
+                              </td>
+                              <td class="fw-bold">
+                                  @trainer.FullName<br>
+                                  <small class="text-muted fw-normal">@trainer.Email</small>
+                              </td>
+                              <td>@(isRtl && !string.IsNullOrEmpty(trainer.SpecialtyAr) ? trainer.SpecialtyAr : trainer.Specialty)</td>
+                              <td>
+                                  @if(trainer.IsActive)
+                                  {
+                                      <span class="badge bg-success">@(isRtl ? "نشط" : "Active")</span>
+                                  }
+                                  else
+                                  {
+                                      <span class="badge bg-danger">@(isRtl ? "موقوف" : "Inactive")</span>
+                                  }
+                              </td>
+                              <td>
+                                  <a href="/Admin/EditTrainer/@trainer.UserId" class="btn btn-sm btn-outline-primary">@(isRtl ? "تعديل" : "Edit")</a>
+                                  <a href="/Trainers/Details/@trainer.UserId" target="_blank" class="btn btn-sm btn-outline-secondary">@(isRtl ? "معاينة" : "View Profile")</a>
+                              </td>
+                          </tr>
+                      }
+                  </tbody>
+              </table>
+          </div>
+      </div>
+    </div>
+  </div>
+</section>

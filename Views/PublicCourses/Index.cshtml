@@ -1,0 +1,186 @@
+@model IEnumerable<MentorDashboardApp.Models.Course>
+@{
+    var currentCulture = System.Threading.Thread.CurrentThread.CurrentCulture.Name;
+    var isRtl = currentCulture.StartsWith("ar");
+    ViewData["Title"] = isRtl ? "تصفح الكورسات" : "Course Catalog";
+    Layout = "_FrontendLayout";
+}
+
+<style>
+    /* Premium Course Card Styles */
+    .course-item {
+        background: #fff;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+        border: 1px solid #eee;
+        position: relative;
+    }
+    .course-item:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 25px rgba(0,0,0,0.1);
+    }
+    .course-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px; /* RTL aware via inline flip if needed, but absolute works */
+        background: rgba(255, 193, 7, 0.9);
+        color: #000;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.8rem;
+        z-index: 2;
+    }
+    .course-badge.free {
+        background: rgba(40, 167, 69, 0.9);
+        color: #fff;
+    }
+    .img-wrapper {
+        position: relative;
+        overflow: hidden;
+    }
+    .img-wrapper img {
+        transition: transform 0.5s ease;
+    }
+    .course-item:hover .img-wrapper img {
+        transform: scale(1.05);
+    }
+    
+    /* Search Form Styles */
+    .search-container {
+        background: #fff;
+        padding: 20px;
+        border-radius: 50px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        margin-top: -30px;
+        position: relative;
+        z-index: 10;
+    }
+    .search-input {
+        border: none;
+        box-shadow: none !important;
+        background: #f8f9fa;
+        border-radius: 30px;
+        padding: 12px 25px;
+    }
+    .search-select {
+        border: none;
+        background: #f8f9fa;
+        border-radius: 30px;
+        padding: 12px 20px;
+    }
+    .btn-search {
+        border-radius: 30px;
+        padding: 12px 30px;
+        font-weight: 600;
+    }
+</style>
+
+<!-- Page Title -->
+<div class="page-title dark-background" data-aos="fade" style="background: url('/frontend/assets/img/page-title-bg.jpg') center center; background-size: cover; position: relative;">
+  <div style="background: rgba(0,0,0,0.7); position: absolute; top:0; left:0; width:100%; height:100%;"></div>
+  <div class="heading position-relative">
+    <div class="container">
+      <div class="row d-flex justify-content-center text-center">
+        <div class="col-lg-8">
+          <h1>@(isRtl ? "تصفح جميع الكورسات" : "Browse All Courses")</h1>
+          <p class="mb-0 text-white-50">@(isRtl ? "اختر ما يناسبك من ضمن مجموعة واسعة من الكورسات الاحترافية لتطوير مهاراتك." : "Choose from a wide range of professional courses to develop your skills.")</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div><!-- End Page Title -->
+
+<section id="courses" class="courses section">
+  <div class="container">
+
+    <div class="row mb-5 justify-content-center">
+      <div class="col-lg-10">
+        <div class="search-container">
+            <form method="get" class="d-flex flex-column flex-md-row gap-3">
+              <div class="flex-grow-1">
+                  <input type="text" name="query" class="form-control search-input" placeholder="@(isRtl ? "ابحث عن كورس (مثال: برمجة، تسويق)..." : "Search courses...")" value="@Context.Request.Query["query"]">
+              </div>
+              <div>
+                  <select name="category" class="form-select search-select" style="min-width: 200px;">
+                    <option value="">@(isRtl ? "كل الأقسام" : "All Categories")</option>
+                    @foreach(var cat in ViewBag.Categories)
+                    {
+                        if(Context.Request.Query["category"] == cat) {
+                            <option value="@cat" selected>@cat</option>
+                        } else {
+                            <option value="@cat">@cat</option>
+                        }
+                    }
+                  </select>
+              </div>
+              <button type="submit" class="btn btn-primary btn-search px-4">
+                  <i class="bi bi-search me-1"></i> @(isRtl ? "بحث" : "Search")
+              </button>
+            </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      @if(!Model.Any())
+      {
+          <div class="col-12 text-center py-5">
+              <i class="bi bi-search fs-1 text-muted"></i>
+              <h3 class="mt-3">@(isRtl ? "لا توجد كورسات مطابقة لبحثك." : "No courses match your search.")</h3>
+          </div>
+      }
+      
+      @foreach(var course in Model)
+      {
+          <div class="col-lg-4 col-md-6 d-flex align-items-stretch" data-aos="zoom-in" data-aos-delay="100">
+            <div class="course-item w-100 mb-4 d-flex flex-column">
+              <div class="img-wrapper">
+                  @if(course.IsFeatured)
+                  {
+                      <div class="course-badge" style="@(isRtl ? "left: 15px; right: auto;" : "right: 15px;")"><i class="bi bi-star-fill"></i> @(isRtl ? "مميز" : "Featured")</div>
+                  }
+                  else if(course.Price == 0)
+                  {
+                      <div class="course-badge free" style="@(isRtl ? "left: 15px; right: auto;" : "right: 15px;")">@(isRtl ? "مجاني" : "Free")</div>
+                  }
+                  <img src="@(string.IsNullOrEmpty(course.ImageUrl) ? "/frontend/assets/img/course-1.jpg" : course.ImageUrl)" class="img-fluid" alt="..." style="height: 250px; object-fit: cover; width: 100%;">
+              </div>
+              <div class="course-content d-flex flex-column flex-grow-1">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <span class="badge bg-light text-primary border px-3 py-2 rounded-pill">@(course.Category ?? (isRtl ? "عام" : "General"))</span>
+                  <h4 class="price mb-0 text-success fw-bold">@(course.Price == 0 ? (isRtl ? "مجاناً" : "Free") : "$" + course.Price)</h4>
+                </div>
+                <h3><a href="/PublicCourses/Details/@course.CourseId" class="text-dark">@(isRtl && !string.IsNullOrEmpty(course.TitleAr) ? course.TitleAr : course.Title)</a></h3>
+                
+                @{
+                    var desc = isRtl && !string.IsNullOrEmpty(course.DescriptionAr) ? course.DescriptionAr : course.Description;
+                    var cleanDesc = System.Text.RegularExpressions.Regex.Replace(desc ?? "", "<.*?>", String.Empty);
+                    var shortDesc = cleanDesc.Length > 100 ? cleanDesc.Substring(0, 100) + "..." : cleanDesc;
+                }
+                <p class="description text-muted mt-2 mb-4" style="font-size: 0.95rem; line-height: 1.6; flex-grow: 1;">@shortDesc</p>
+                
+                <div class="trainer d-flex justify-content-between align-items-center border-top pt-3 mt-auto">
+                  <div class="trainer-profile d-flex align-items-center">
+                    <img src="~/frontend/assets/img/trainers/trainer-1.jpg" class="img-fluid rounded-circle" alt="" style="width: 40px; height: 40px; object-fit: cover; margin-left: @(isRtl ? "10px" : "0"); margin-right: @(isRtl ? "0" : "10px");">
+                    <span class="text-muted" style="font-size: 0.9rem;">@(course.Trainer?.FullName ?? (isRtl ? "فريق العمل" : "Our Team"))</span>
+                  </div>
+                  <div class="trainer-rank d-flex align-items-center text-muted" style="font-size: 0.9rem;">
+                    <i class="bi bi-journal-text me-1"></i> @(course.TotalLessons ?? 0)
+                  </div>
+                </div>
+                
+                <div class="mt-3 text-center">
+                    <a href="/PublicCourses/Details/@course.CourseId" class="btn btn-outline-primary rounded-pill w-100">
+                        @(isRtl ? "عرض التفاصيل" : "View Details") <i class="bi bi-arrow-@(isRtl ? "left" : "right") ms-1"></i>
+                    </a>
+                </div>
+              </div>
+            </div>
+          </div>
+      }
+    </div>
+  </div>
+</section>

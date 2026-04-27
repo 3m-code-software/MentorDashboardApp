@@ -1,0 +1,46 @@
+@model IEnumerable<MentorDashboardApp.Models.User>
+@{
+    var currentCulture = System.Threading.Thread.CurrentThread.CurrentCulture.Name;
+    var isRtl = currentCulture.StartsWith("ar");
+    ViewData["Title"] = isRtl ? "المدربون الخبراء" : "Expert Trainers";
+    Layout = "_FrontendLayout";
+}
+
+<!-- Page Title -->
+<div class="page-title dark-background" data-aos="fade" style="background: url('/frontend/assets/img/page-title-bg.jpg') center center; background-size: cover; padding: 60px 0;">
+  <div class="container text-center">
+    <h1>@(isRtl ? "المدربون الخبراء" : "Expert Trainers")</h1>
+    <p class="text-white-50 mt-2">@(isRtl ? "تعلم من أفضل الخبراء في مجالاتهم واصقل مهاراتك" : "Learn from the best experts in their fields and master your skills")</p>
+  </div>
+</div>
+
+<section id="trainers" class="trainers section">
+  <div class="container" data-aos="fade-up" data-aos-delay="100">
+    <div class="row gy-5 @(isRtl ? "rtl" : "")">
+
+      @foreach(var trainer in Model)
+      {
+          var specialty = isRtl && !string.IsNullOrEmpty(trainer.SpecialtyAr) ? trainer.SpecialtyAr : trainer.Specialty;
+          var bio = isRtl && !string.IsNullOrEmpty(trainer.BioAr) ? trainer.BioAr : trainer.Bio;
+          var imageUrl = string.IsNullOrEmpty(trainer.ProfileImageUrl) ? "/frontend/assets/img/trainers/trainer-1.jpg" : trainer.ProfileImageUrl;
+          
+          <div class="col-lg-4 col-md-6 member" data-aos="fade-up" data-aos-delay="100">
+            <div class="member-img">
+              <img src="@imageUrl" class="img-fluid rounded" alt="" style="width: 100%; height: 300px; object-fit: cover;">
+              <div class="social">
+                @if (!string.IsNullOrEmpty(trainer.TwitterUrl)) { <a href="@trainer.TwitterUrl"><i class="bi bi-twitter-x"></i></a> }
+                @if (!string.IsNullOrEmpty(trainer.FacebookUrl)) { <a href="@trainer.FacebookUrl"><i class="bi bi-facebook"></i></a> }
+                @if (!string.IsNullOrEmpty(trainer.LinkedInUrl)) { <a href="@trainer.LinkedInUrl"><i class="bi bi-linkedin"></i></a> }
+              </div>
+            </div>
+            <div class="member-info text-center mt-3">
+              <h4><a href="/Trainers/Details/@trainer.UserId" class="text-dark text-decoration-none">@trainer.FullName</a></h4>
+              <span style="color: #5fcf80; display: block; font-size: 14px; font-weight: 600; margin-bottom: 10px;">@specialty</span>
+              <p style="font-size: 14px; color: #aaaaaa;">@(string.IsNullOrEmpty(bio) ? "" : (bio.Length > 80 ? bio.Substring(0, 80) + "..." : bio))</p>
+            </div>
+          </div>
+      }
+
+    </div>
+  </div>
+</section>

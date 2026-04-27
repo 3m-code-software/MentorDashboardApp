@@ -1,0 +1,234 @@
+@{
+    var isRtl = System.Threading.Thread.CurrentThread.CurrentCulture.Name.StartsWith("ar");
+}
+
+<!-- Floating Chatbot Button -->
+<div id="chatbot-button" class="chatbot-btn shadow-lg" onclick="toggleChatbot()">
+    <i class="bi bi-robot"></i>
+</div>
+
+<!-- Chatbot Window -->
+<div id="chatbot-window" class="chatbot-window shadow-lg @(isRtl ? "rtl" : "ltr")">
+    <!-- Header -->
+    <div class="chatbot-header d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center">
+            <div class="chatbot-avatar bg-white text-primary rounded-circle d-flex justify-content-center align-items-center me-2 ms-2">
+                <i class="bi bi-robot fs-5"></i>
+            </div>
+            <div>
+                <h6 class="m-0 fw-bold text-white">@(isRtl ? "المساعد الذكي (AI)" : "Mentor AI Assistant")</h6>
+                <small class="text-light" style="font-size: 0.75rem;"><i class="bi bi-circle-fill text-success" style="font-size: 0.5rem;"></i> @(isRtl ? "متصل الآن" : "Online")</small>
+            </div>
+        </div>
+        <button class="btn btn-sm text-white border-0" onclick="toggleChatbot()">
+            <i class="bi bi-x-lg"></i>
+        </button>
+    </div>
+
+    <!-- Messages Area -->
+    <div id="chatbot-messages" class="chatbot-messages p-3">
+        <!-- Welcome Message -->
+        <div class="chat-message bot-message mb-3">
+            <div class="message-content bg-light text-dark p-2 rounded shadow-sm" style="font-size: 0.9rem; max-width: 85%;">
+                @(isRtl ? "مرحباً! أنا المساعد الذكي لمنصة Mentor. كيف يمكنني مساعدتك اليوم؟ يمكنك سؤالي عن الكورسات، الأسعار، أو شهادات الإتمام." : "Hello! I am the Mentor AI Assistant. How can I help you today? You can ask me about courses, pricing, or certificates.")
+            </div>
+        </div>
+    </div>
+
+    <!-- Typing Indicator -->
+    <div id="chatbot-typing" class="chatbot-typing p-2 text-muted" style="display: none; font-size: 0.8rem;">
+        <i class="bi bi-three-dots"></i> @(isRtl ? "الذكاء الاصطناعي يكتب..." : "AI is typing...")
+    </div>
+
+    <!-- Input Area -->
+    <div class="chatbot-input border-top p-2 bg-white d-flex align-items-center">
+        <input type="text" id="chatbot-input-field" class="form-control border-0 shadow-none" placeholder="@(isRtl ? "اكتب سؤالك هنا..." : "Type your question here...")" onkeypress="handleChatbotKeyPress(event)">
+        <button class="btn btn-primary rounded-circle ms-2 me-2 d-flex justify-content-center align-items-center" style="width: 40px; height: 40px;" onclick="sendChatMessage()">
+            <i class="bi @(isRtl ? "bi-send-fill" : "bi-send-fill")" style="@(isRtl ? "transform: scaleX(-1);" : "")"></i>
+        </button>
+    </div>
+</div>
+
+<style>
+    .chatbot-btn {
+        position: fixed;
+        bottom: 30px;
+        @(isRtl ? "left: 30px;" : "right: 30px;")
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #0d6efd, #0dcaf0);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 1.8rem;
+        cursor: pointer;
+        z-index: 9999;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .chatbot-btn:hover {
+        transform: scale(1.1);
+        box-shadow: 0 10px 20px rgba(13, 110, 253, 0.4) !important;
+    }
+
+    .chatbot-window {
+        position: fixed;
+        bottom: 100px;
+        @(isRtl ? "left: 30px;" : "right: 30px;")
+        width: 350px;
+        height: 500px;
+        background: #fdfdfd;
+        border-radius: 15px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        z-index: 9999;
+        opacity: 0;
+        pointer-events: none;
+        transform: translateY(20px) scale(0.95);
+        transition: opacity 0.3s ease, transform 0.3s ease;
+        border: 1px solid rgba(0,0,0,0.1);
+    }
+
+    .chatbot-window.active {
+        opacity: 1;
+        pointer-events: auto;
+        transform: translateY(0) scale(1);
+    }
+
+    .chatbot-header {
+        background: linear-gradient(135deg, #0d6efd, #0dcaf0);
+        padding: 15px;
+        color: white;
+    }
+
+    .chatbot-avatar {
+        width: 40px;
+        height: 40px;
+    }
+
+    .chatbot-messages {
+        flex: 1;
+        overflow-y: auto;
+        background: #f8f9fa;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .chat-message {
+        display: flex;
+        margin-bottom: 15px;
+    }
+
+    .bot-message {
+        justify-content: flex-start;
+    }
+
+    .user-message {
+        justify-content: flex-end;
+    }
+
+    .bot-message .message-content {
+        background: white;
+        border: 1px solid #eee;
+        border-bottom-left-radius: 0;
+    }
+
+    .user-message .message-content {
+        background: #0d6efd;
+        color: white !important;
+        border-bottom-right-radius: 0;
+    }
+
+    .chatbot-input input:focus {
+        outline: none;
+        box-shadow: none;
+    }
+
+    /* Scrollbar */
+    .chatbot-messages::-webkit-scrollbar { width: 6px; }
+    .chatbot-messages::-webkit-scrollbar-track { background: #f1f1f1; }
+    .chatbot-messages::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
+    .chatbot-messages::-webkit-scrollbar-thumb:hover { background: #aaa; }
+</style>
+
+<script>
+    const isChatbotRtl = @isRtl.ToString().ToLower();
+
+    function toggleChatbot() {
+        const window = document.getElementById('chatbot-window');
+        window.classList.toggle('active');
+        if (window.classList.contains('active')) {
+            setTimeout(() => document.getElementById('chatbot-input-field').focus(), 300);
+        }
+    }
+
+    function handleChatbotKeyPress(event) {
+        if (event.key === 'Enter') {
+            sendChatMessage();
+        }
+    }
+
+    function sendChatMessage() {
+        const inputField = document.getElementById('chatbot-input-field');
+        const message = inputField.value.trim();
+        if (!message) return;
+
+        // Clear input
+        inputField.value = '';
+
+        // Append User Message
+        appendMessage(message, 'user');
+
+        // Show typing indicator
+        const typingIndicator = document.getElementById('chatbot-typing');
+        const messagesArea = document.getElementById('chatbot-messages');
+        typingIndicator.style.display = 'block';
+        messagesArea.scrollTop = messagesArea.scrollHeight;
+
+        // Call backend API
+        fetch('/api/Chatbot/Ask', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ question: message })
+        })
+        .then(response => response.json())
+        .then(data => {
+            typingIndicator.style.display = 'none';
+            appendMessage(data.answer, 'bot');
+        })
+        .catch(error => {
+            typingIndicator.style.display = 'none';
+            appendMessage(isChatbotRtl ? "عذراً، حدث خطأ في الاتصال بالخادم." : "Sorry, a connection error occurred.", 'bot');
+        });
+    }
+
+    function appendMessage(text, sender) {
+        const messagesArea = document.getElementById('chatbot-messages');
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `chat-message ${sender}-message mb-3 fade-in`;
+        
+        let radiusStyle = sender === 'user' 
+            ? (isChatbotRtl ? 'border-bottom-left-radius: 0;' : 'border-bottom-right-radius: 0;')
+            : (isChatbotRtl ? 'border-bottom-right-radius: 0;' : 'border-bottom-left-radius: 0;');
+
+        messageDiv.innerHTML = `
+            <div class="message-content p-2 rounded shadow-sm" style="font-size: 0.9rem; max-width: 85%; ${radiusStyle}">
+                ${text}
+            </div>
+        `;
+        
+        messagesArea.appendChild(messageDiv);
+        
+        // Style adjustments for User
+        if(sender === 'user') {
+            messageDiv.querySelector('.message-content').classList.add('bg-primary', 'text-white');
+        } else {
+            messageDiv.querySelector('.message-content').classList.add('bg-white', 'text-dark');
+        }
+
+        messagesArea.scrollTop = messagesArea.scrollHeight;
+    }
+</script>

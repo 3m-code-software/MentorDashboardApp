@@ -1,0 +1,78 @@
+@model IEnumerable<MentorDashboardApp.Models.Course>
+@using Microsoft.AspNetCore.Mvc.Localization
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<SharedResource> Localizer
+@{
+    ViewData["Title"] = Localizer["Courses"];
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var isRtl = System.Threading.Thread.CurrentThread.CurrentCulture.Name.StartsWith("ar");
+}
+
+<div class="pagetitle">
+  <h1>@Localizer["Courses"]</h1>
+  <nav>
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="/Admin/Index">@Localizer["Home"]</a></li>
+      <li class="breadcrumb-item active">@Localizer["Courses"]</li>
+    </ol>
+  </nav>
+</div>
+
+<section class="section">
+  <div class="row">
+    <div class="col-lg-12">
+
+      <div class="card">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-3 pt-3">
+              <h5 class="card-title m-0 p-0">@Localizer["ManageCourses"]</h5>
+              <a href="/Courses/Create" class="btn btn-primary btn-sm"><i class="bi bi-plus-circle"></i> @Localizer["AddCourse"]</a>
+          </div>
+
+          <table class="table table-striped datatable">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">@Localizer["Title"]</th>
+                <th scope="col">@Localizer["Price"]</th>
+                <th scope="col">@Localizer["Actions"]</th>
+              </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <th scope="row">@item.CourseId</th>
+                        <td>
+                            <!-- Logic: Show Arabic Title if language is Arabic AND TitleAr is not empty, otherwise show English Title -->
+                            @(isRtl && !string.IsNullOrWhiteSpace(item.TitleAr) ? item.TitleAr : item.Title)
+                        </td>
+                        <td>$@item.Price</td>
+                        <td>
+                            <a href="/Courses/Duplicate/@item.CourseId" class="btn btn-secondary btn-sm" data-bs-toggle="tooltip" title="@(isRtl ? "نسخ الكورس" : "Duplicate Course")"><i class="bi bi-copy"></i></a>
+                            <a href="/Curriculum/Builder/@item.CourseId" class="btn btn-info btn-sm text-white" data-bs-toggle="tooltip" title="@(isRtl ? "إدارة الدروس" : "Manage Lessons")"><i class="bi bi-journal-text"></i></a>
+                            <a href="/Courses/Edit/@item.CourseId" class="btn btn-warning btn-sm" data-bs-toggle="tooltip" title="@(isRtl ? "تعديل الكورس" : "Edit Course")"><i class="bi bi-pencil"></i></a>
+                            <a href="#" class="btn btn-danger btn-sm" data-bs-toggle="tooltip" title="@(isRtl ? "حذف" : "Delete")"><i class="bi bi-trash"></i></a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+          </table>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        });
+    </script>
+}
