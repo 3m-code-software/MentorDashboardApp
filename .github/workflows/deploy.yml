@@ -21,4 +21,4 @@ jobs:
 
     - name: Build and Publish to MonsterASP
       run: |
-        dotnet publish -c Release /p:PublishMethod=MSDeploy /p:PublishSiteName="site65905" /p:PublishUrl="https://site65905.siteasp.net:8172/msdeploy.axd" /p:UserName="site65905" /p:Password="${{ secrets.MONSTERASP_PASSWORD }}" /p:AllowUntrustedCertificate=True /p:DeployIisAppPath="site65905"
+        dotnet publish -c Release /p:DeployOnBuild=true /p:PublishMethod=MSDeploy /p:PublishSiteName="site65905" /p:PublishUrl="https://site65905.siteasp.net:8172/msdeploy.axd" /p:UserName="site65905" /p:Password="${{ secrets.MONSTERASP_PASSWORD }}" /p:AllowUntrustedCertificate=True /p:DeployIisAppPath="site65905"
